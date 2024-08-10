@@ -1,0 +1,43 @@
+#include <WiFi.h>
+
+const char* ssid = "YOUR_WIFI_SSID";
+const char* password = "YOUR_WIFI_PASSWORD";
+const char* serverIP = "127.0.0.1"; // Localhost address for MATLAB on the same laptop
+const int serverPort = 8080; // Port for HTTP communication
+
+void setup() {
+  Serial.begin(115200);
+  WiFi.begin(ssid, password);
+
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(1000);
+    Serial.println("Connecting to WiFi...");
+  }
+
+  Serial.println("Connected to WiFi");
+}
+
+void loop() {
+  // Capture image and convert to bytes
+  // Assume imgData contains the image bytes
+
+  WiFiClient client;
+  if (client.connect(serverIP, serverPort)) {
+    Serial.println("Connected to server");
+
+    client.println("POST /image_endpoint HTTP/1.1");
+    client.println("Host: localhost");
+    client.println("Content-Type: application/octet-stream");
+    client.print("Content-Length: ");
+    client.println(imgDataSize);
+    client.println();
+    client.write(imgData, imgDataSize);
+
+    Serial.println("Image sent");
+    client.stop();
+  } else {
+    Serial.println("Connection to server failed");
+  }
+
+  delay(5000); // Delay before sending the next image
+}
